@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>配對大師 SEN 訓練系統</title>
+    <title>視覺認知訓練</title>
     <style>
         :root { --primary: #007AFF; --success: #28a745; --danger: #dc3545; --gaze: #ffeb3b; --empty: #e0e0e0; }
         * { -webkit-touch-callout: none; -webkit-user-select: none; touch-action: none; box-sizing: border-box; }
@@ -13,7 +13,7 @@
         #settings-panel { position: fixed; inset: 0; background: white; z-index: 2000; padding: 30px; overflow-y: auto; }
         .setting-item { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .btn { padding: 15px 20px; border: 3px solid #ddd; border-radius: 15px; background: white; font-size: 1.1rem; cursor: pointer; }
+        .btn { padding: 15px 20px; border: 3px solid #ddd; border-radius: 15px; background: white; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
         .btn.active { border-color: var(--primary); background: #eef6ff; color: var(--primary); font-weight: bold; }
         #start-btn { width: 100%; background: var(--success); color: white; padding: 25px; font-size: 2rem; border-radius: 20px; border: none; margin-top: 20px; font-weight: bold; cursor: pointer; }
 
@@ -45,7 +45,7 @@
 <body>
 
 <div id="settings-panel">
-    <h1 style="text-align:center;">🎯 配對大師 SEN 訓練系統</h1>
+    <h1 style="text-align:center;">🎯 視覺認知訓練</h1>
     
     <div class="setting-item">
         <h3>1. 教學主題</h3>
@@ -86,7 +86,7 @@
 <div id="game-area"></div>
 
 <script>
-    // 統一使用 .png (根據你的 GitHub 列表)
+    // 數據庫與檔案名稱 (統一 .png)
     const itemsData = [
         { name: '帽子', file: 'cap.png' }, { name: '長褲', file: 'pant.png' },
         { name: '鞋子', file: 'shoes.png' }, { name: '襪子', file: 'sock.png' }, { name: '衣服', file: 'tee.png' }
@@ -101,7 +101,7 @@
     let timer = null;
     let isTransitioning = false;
 
-    // 按鈕控制
+    // 按鈕控制邏輯
     document.querySelectorAll('.theme-btn').forEach(b => b.onclick = () => {
         document.querySelectorAll('.theme-btn').forEach(x => x.classList.remove('active'));
         b.classList.add('active'); config.theme = b.dataset.theme;
@@ -143,6 +143,7 @@
 
         let options = [{ data: target, isCorrect: true, type: 'img' }];
 
+        // 根據難度決定第二個格子
         if (config.lv === 2) {
             options.push({ data: null, isCorrect: false, type: 'empty' });
         } else if (config.lv === 3) {
@@ -154,6 +155,7 @@
             options.push({ data: distractor, isCorrect: false, type: 'img' });
         }
 
+        // 隨機左右位置
         options.sort(() => Math.random() - 0.5).forEach(opt => {
             const card = document.createElement('div');
             card.className = opt.type === 'empty' ? 'match-card empty-slot' : 'match-card';
