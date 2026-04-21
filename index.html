@@ -5,39 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>視覺認知訓練</title>
     <style>
-        :root { --primary: #007AFF; --success: #28a745; --danger: #dc3545; --gaze: #ffeb3b; --empty: #e0e0e0; }
+        /* 調整顏色變數：黑底方案 */
+        :root { 
+            --primary: #007AFF; 
+            --success: #28a745; 
+            --danger: #dc3545; 
+            --gaze: #ffeb3b; 
+            --empty: #333333; /* 空白格改為深灰色 */
+            --bg-color: #000000; /* 全背景黑色 */
+            --text-color: #ffffff; 
+        }
+        
         * { -webkit-touch-callout: none; -webkit-user-select: none; touch-action: none; box-sizing: border-box; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f8f9fa; font-family: -apple-system, sans-serif; }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; 
+            background: var(--bg-color); 
+            color: var(--text-color);
+            font-family: -apple-system, sans-serif; 
+        }
         
         /* 設定面板 */
-        #settings-panel { position: fixed; inset: 0; background: white; z-index: 2000; padding: 30px; overflow-y: auto; }
-        .setting-item { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
+        #settings-panel { position: fixed; inset: 0; background: #1a1a1a; z-index: 2000; padding: 30px; overflow-y: auto; color: white; }
+        .setting-item { margin-bottom: 25px; border-bottom: 1px solid #444; padding-bottom: 15px; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .btn { padding: 15px 20px; border: 3px solid #ddd; border-radius: 15px; background: white; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
-        .btn.active { border-color: var(--primary); background: #eef6ff; color: var(--primary); font-weight: bold; }
+        .btn { padding: 15px 20px; border: 3px solid #555; border-radius: 15px; background: #333; color: white; font-size: 1.1rem; cursor: pointer; transition: 0.2s; }
+        .btn.active { border-color: var(--primary); background: var(--primary); font-weight: bold; }
         #start-btn { width: 100%; background: var(--success); color: white; padding: 25px; font-size: 2rem; border-radius: 20px; border: none; margin-top: 20px; font-weight: bold; cursor: pointer; }
 
         /* 遊戲介面 */
-        #ui-header { position: fixed; top: 0; width: 100%; height: 90px; background: white; display: none; justify-content: space-between; align-items: center; padding: 0 30px; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        #game-area { display: flex; justify-content: center; align-items: center; gap: 60px; width: 100vw; height: 100vh; padding-top: 90px; position: relative; }
+        #ui-header { position: fixed; top: 0; width: 100%; height: 90px; background: #1a1a1a; display: none; justify-content: space-between; align-items: center; padding: 0 30px; z-index: 100; border-bottom: 2px solid #333; }
+        #game-area { display: flex; justify-content: center; align-items: center; gap: 80px; width: 100vw; height: 100vh; padding-top: 90px; position: relative; }
         
+        /* 強化選項卡片對比 */
         .match-card { 
-            position: relative; padding: 20px; background: white; border-radius: 35px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 12px solid transparent;
+            position: relative; padding: 20px; 
+            background: #ffffff; /* 圖片卡片保持白底，與黑背景形成極高對比 */
+            border-radius: 35px; 
+            box-shadow: 0 0 30px rgba(255,255,255,0.1); 
+            border: 12px solid transparent;
             transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
-        .match-card.empty-slot { background: var(--empty); }
+        /* 空白格樣式：深色不顯眼 */
+        .match-card.empty-slot { background: var(--empty); border: 12px solid #222; }
         .match-card.empty-slot .placeholder { width: 400px; height: 300px; }
 
         .match-card img { display: block; border-radius: 18px; width: 400px; height: 300px; object-fit: contain; pointer-events: none; }
-        .progress-bar { position: absolute; bottom: -18px; left: 0; width: 0%; height: 15px; background: var(--primary); border-radius: 8px; }
+        .progress-bar { position: absolute; bottom: -18px; left: 0; width: 0%; height: 18px; background: var(--gaze); border-radius: 9px; box-shadow: 0 0 15px var(--gaze); }
 
-        /* 特效 */
+        /* 特效：成功時發光 */
         .match-card.correct-center {
             position: absolute !important; left: 50% !important; top: 55% !important;
             transform: translate(-50%, -50%) scale(1.6) !important;
-            border-color: var(--success) !important; z-index: 1000 !important;
+            border-color: var(--success) !important; 
+            box-shadow: 0 0 100px rgba(40, 167, 69, 0.8) !important;
+            z-index: 1000 !important;
         }
         .match-card.fade-out { opacity: 0; transform: scale(0.5); pointer-events: none; }
     </style>
@@ -78,15 +102,14 @@
 </div>
 
 <div id="ui-header">
-    <button onclick="location.reload()" style="padding:10px 20px; font-size:1.1rem; border-radius:10px; cursor:pointer;">🏠 返回</button>
-    <div style="font-size: 2.2rem; font-weight: bold;">請找出：<span id="target-name" style="color:var(--primary);">---</span></div>
+    <button onclick="location.reload()" style="padding:10px 20px; background:#333; color:white; border:1px solid #555; border-radius:10px; cursor:pointer;">🏠 返回</button>
+    <div style="font-size: 2.2rem; font-weight: bold;">請找出：<span id="target-name" style="color:var(--gaze);">---</span></div>
     <div style="width:100px;"></div>
 </div>
 
 <div id="game-area"></div>
 
 <script>
-    // 數據庫與檔案名稱 (統一 .png)
     const itemsData = [
         { name: '帽子', file: 'cap.png' }, { name: '長褲', file: 'pant.png' },
         { name: '鞋子', file: 'shoes.png' }, { name: '襪子', file: 'sock.png' }, { name: '衣服', file: 'tee.png' }
@@ -101,11 +124,9 @@
     let timer = null;
     let isTransitioning = false;
 
-    // 按鈕控制邏輯
     document.querySelectorAll('.theme-btn').forEach(b => b.onclick = () => {
         document.querySelectorAll('.theme-btn').forEach(x => x.classList.remove('active'));
         b.classList.add('active'); config.theme = b.dataset.theme;
-        document.documentElement.style.setProperty('--primary', config.theme === 'fruits' ? '#FF9500' : '#007AFF');
     });
     document.querySelectorAll('.lv-btn').forEach(b => b.onclick = () => {
         document.querySelectorAll('.lv-btn').forEach(x => x.classList.remove('active'));
@@ -136,26 +157,22 @@
         
         const currentPool = config.theme === 'items' ? itemsData : fruitsData;
         const otherPool = config.theme === 'items' ? fruitsData : itemsData;
-
         const target = currentPool[Math.floor(Math.random() * currentPool.length)];
+        
         document.getElementById('target-name').innerText = target.name;
         speak("請找出" + target.name);
 
         let options = [{ data: target, isCorrect: true, type: 'img' }];
 
-        // 根據難度決定第二個格子
         if (config.lv === 2) {
             options.push({ data: null, isCorrect: false, type: 'empty' });
         } else if (config.lv === 3) {
-            const distractor = otherPool[Math.floor(Math.random() * otherPool.length)];
-            options.push({ data: distractor, isCorrect: false, type: 'img' });
+            options.push({ data: otherPool[Math.floor(Math.random() * otherPool.length)], isCorrect: false, type: 'img' });
         } else if (config.lv === 4) {
             const others = currentPool.filter(i => i.name !== target.name);
-            const distractor = others[Math.floor(Math.random() * others.length)];
-            options.push({ data: distractor, isCorrect: false, type: 'img' });
+            options.push({ data: others[Math.floor(Math.random() * others.length)], isCorrect: false, type: 'img' });
         }
 
-        // 隨機左右位置
         options.sort(() => Math.random() - 0.5).forEach(opt => {
             const card = document.createElement('div');
             card.className = opt.type === 'empty' ? 'match-card empty-slot' : 'match-card';
