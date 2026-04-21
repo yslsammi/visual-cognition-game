@@ -31,7 +31,7 @@
         .match-card img { display: block; border-radius: 18px; width: 400px; height: 300px; object-fit: contain; pointer-events: none; }
         .progress-bar { position: absolute; bottom: -18px; left: 0; width: 0%; height: 15px; background: var(--primary); border-radius: 8px; }
 
-        /* 答對置中放大特效 */
+        /* 答對特效 */
         .match-card.correct-center {
             position: absolute !important;
             left: 50% !important;
@@ -86,7 +86,7 @@
 <div id="game-area"></div>
 
 <script>
-    // 📦 根據你的 GitHub 檔案列表，副檔名全部統一為 .png
+    // 📦 根據你的截圖，所有檔案現在統一使用 .png 副檔名
     const itemsData = [
         { name: '帽子', file: 'cap.png' },
         { name: '長褲', file: 'pant.png' },
