@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>配對大師 SEN Trainer</title>
+    <title>配對大師 SEN 訓練系統</title>
     <style>
-        :root { --primary: #007AFF; --success: #28a745; --danger: #dc3545; --gaze: #ffeb3b; }
+        :root { --primary: #007AFF; --success: #28a745; --danger: #dc3545; --gaze: #ffeb3b; --empty: #e0e0e0; }
         * { -webkit-touch-callout: none; -webkit-user-select: none; touch-action: none; box-sizing: border-box; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f8f9fa; font-family: -apple-system, sans-serif; }
         
@@ -13,7 +13,7 @@
         #settings-panel { position: fixed; inset: 0; background: white; z-index: 2000; padding: 30px; overflow-y: auto; }
         .setting-item { margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-        .btn { padding: 15px 25px; border: 3px solid #ddd; border-radius: 15px; background: white; font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
+        .btn { padding: 15px 20px; border: 3px solid #ddd; border-radius: 15px; background: white; font-size: 1.1rem; cursor: pointer; }
         .btn.active { border-color: var(--primary); background: #eef6ff; color: var(--primary); font-weight: bold; }
         #start-btn { width: 100%; background: var(--success); color: white; padding: 25px; font-size: 2rem; border-radius: 20px; border: none; margin-top: 20px; font-weight: bold; cursor: pointer; }
 
@@ -25,21 +25,19 @@
             position: relative; padding: 20px; background: white; border-radius: 35px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 12px solid transparent;
             transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 10;
         }
         
+        .match-card.empty-slot { background: var(--empty); }
+        .match-card.empty-slot .placeholder { width: 400px; height: 300px; }
+
         .match-card img { display: block; border-radius: 18px; width: 400px; height: 300px; object-fit: contain; pointer-events: none; }
         .progress-bar { position: absolute; bottom: -18px; left: 0; width: 0%; height: 15px; background: var(--primary); border-radius: 8px; }
 
-        /* 答對特效 */
+        /* 特效 */
         .match-card.correct-center {
-            position: absolute !important;
-            left: 50% !important;
-            top: 55% !important;
+            position: absolute !important; left: 50% !important; top: 55% !important;
             transform: translate(-50%, -50%) scale(1.6) !important;
-            border-color: var(--success) !important;
-            box-shadow: 0 0 80px rgba(40, 167, 69, 0.9) !important;
-            z-index: 1000 !important;
+            border-color: var(--success) !important; z-index: 1000 !important;
         }
         .match-card.fade-out { opacity: 0; transform: scale(0.5); pointer-events: none; }
     </style>
@@ -47,10 +45,10 @@
 <body>
 
 <div id="settings-panel">
-    <h1 style="text-align:center;">🎯 配對大師 SEN Trainer</h1>
+    <h1 style="text-align:center;">🎯 配對大師 SEN 訓練系統</h1>
     
     <div class="setting-item">
-        <h3>1. 選擇教學主題</h3>
+        <h3>1. 教學主題</h3>
         <div class="btn-group">
             <button class="btn theme-btn active" data-theme="items">日常用品</button>
             <button class="btn theme-btn" data-theme="fruits">水果</button>
@@ -58,19 +56,21 @@
     </div>
 
     <div class="setting-item">
-        <h3>2. 難度等級</h3>
+        <h3>2. 訓練難度</h3>
         <div class="btn-group">
             <button class="btn lv-btn active" data-lv="1">Lv 1: 單一目標</button>
-            <button class="btn lv-btn" data-lv="2">Lv 2: 目標 vs 干擾項</button>
+            <button class="btn lv-btn" data-lv="2">Lv 2: 二選一 (空白格)</button>
+            <button class="btn lv-btn" data-lv="3">Lv 3: 不同類干擾</button>
+            <button class="btn lv-btn" data-lv="4">Lv 4: 同類辨識</button>
         </div>
     </div>
 
     <div class="setting-item">
         <h3>3. 注視時間</h3>
         <div class="btn-group">
-            <button class="btn dwell-btn" data-ms="500">快速 (0.5s)</button>
-            <button class="btn dwell-btn active" data-ms="1000">標準 (1.0s)</button>
-            <button class="btn dwell-btn" data-ms="2000">慢速 (2.0s)</button>
+            <button class="btn dwell-btn" data-ms="500">0.5s</button>
+            <button class="btn dwell-btn active" data-ms="1000">1.0s</button>
+            <button class="btn dwell-btn" data-ms="2000">2.0s</button>
         </div>
     </div>
     
@@ -78,47 +78,39 @@
 </div>
 
 <div id="ui-header">
-    <button onclick="location.reload()" style="padding:10px 20px; font-size:1.2rem; border-radius:10px; cursor:pointer;">🏠 返回設定</button>
+    <button onclick="location.reload()" style="padding:10px 20px; font-size:1.1rem; border-radius:10px; cursor:pointer;">🏠 返回</button>
     <div style="font-size: 2.2rem; font-weight: bold;">請找出：<span id="target-name" style="color:var(--primary);">---</span></div>
-    <div style="width:120px;"></div>
+    <div style="width:100px;"></div>
 </div>
 
 <div id="game-area"></div>
 
 <script>
-    // 📦 根據你的截圖，所有檔案現在統一使用 .png 副檔名
+    // 統一使用 .png (根據你的 GitHub 列表)
     const itemsData = [
-        { name: '帽子', file: 'cap.png' },
-        { name: '長褲', file: 'pant.png' },
-        { name: '鞋子', file: 'shoes.png' },
-        { name: '襪子', file: 'sock.png' },
-        { name: '衣服', file: 'tee.png' }
+        { name: '帽子', file: 'cap.png' }, { name: '長褲', file: 'pant.png' },
+        { name: '鞋子', file: 'shoes.png' }, { name: '襪子', file: 'sock.png' }, { name: '衣服', file: 'tee.png' }
     ];
 
     const fruitsData = [
-        { name: '蘋果', file: 'apple.png' },
-        { name: '香蕉', file: 'banana.png' },
-        { name: '橙', file: 'orange.png' },
-        { name: '西瓜', file: 'watermelon.png' }
+        { name: '蘋果', file: 'apple.png' }, { name: '香蕉', file: 'banana.png' },
+        { name: '橙', file: 'orange.png' }, { name: '西瓜', file: 'watermelon.png' }
     ];
 
     let config = { theme: 'items', lv: 1, dwell: 1000 };
     let timer = null;
     let isTransitioning = false;
 
-    // 設定按鈕邏輯
+    // 按鈕控制
     document.querySelectorAll('.theme-btn').forEach(b => b.onclick = () => {
         document.querySelectorAll('.theme-btn').forEach(x => x.classList.remove('active'));
-        b.classList.add('active'); 
-        config.theme = b.dataset.theme;
+        b.classList.add('active'); config.theme = b.dataset.theme;
         document.documentElement.style.setProperty('--primary', config.theme === 'fruits' ? '#FF9500' : '#007AFF');
     });
-
     document.querySelectorAll('.lv-btn').forEach(b => b.onclick = () => {
         document.querySelectorAll('.lv-btn').forEach(x => x.classList.remove('active'));
         b.classList.add('active'); config.lv = parseInt(b.dataset.lv);
     });
-
     document.querySelectorAll('.dwell-btn').forEach(b => b.onclick = () => {
         document.querySelectorAll('.dwell-btn').forEach(x => x.classList.remove('active'));
         b.classList.add('active'); config.dwell = parseInt(b.dataset.ms);
@@ -143,29 +135,35 @@
         area.innerHTML = '';
         
         const currentPool = config.theme === 'items' ? itemsData : fruitsData;
-        const distractorPool = config.theme === 'items' ? fruitsData : itemsData;
+        const otherPool = config.theme === 'items' ? fruitsData : itemsData;
 
         const target = currentPool[Math.floor(Math.random() * currentPool.length)];
         document.getElementById('target-name').innerText = target.name;
         speak("請找出" + target.name);
 
-        let options = [{ data: target, isCorrect: true }];
+        let options = [{ data: target, isCorrect: true, type: 'img' }];
 
         if (config.lv === 2) {
-            const distractor = distractorPool[Math.floor(Math.random() * distractorPool.length)];
-            options.push({ data: distractor, isCorrect: false });
+            options.push({ data: null, isCorrect: false, type: 'empty' });
+        } else if (config.lv === 3) {
+            const distractor = otherPool[Math.floor(Math.random() * otherPool.length)];
+            options.push({ data: distractor, isCorrect: false, type: 'img' });
+        } else if (config.lv === 4) {
+            const others = currentPool.filter(i => i.name !== target.name);
+            const distractor = others[Math.floor(Math.random() * others.length)];
+            options.push({ data: distractor, isCorrect: false, type: 'img' });
         }
 
-        const cards = [];
         options.sort(() => Math.random() - 0.5).forEach(opt => {
             const card = document.createElement('div');
-            card.className = 'match-card';
-            const img = document.createElement('img');
-            img.src = opt.data.file;
-            card.appendChild(img);
-            card.innerHTML += `<div class="progress-bar"></div>`;
-            cards.push(card);
-
+            card.className = opt.type === 'empty' ? 'match-card empty-slot' : 'match-card';
+            
+            if (opt.type === 'empty') {
+                card.innerHTML = `<div class="placeholder"></div><div class="progress-bar"></div>`;
+            } else {
+                card.innerHTML = `<img src="${opt.data.file}"><div class="progress-bar"></div>`;
+            }
+            
             const start = (e) => {
                 if (isTransitioning) return;
                 e.preventDefault();
@@ -178,12 +176,12 @@
                     if (opt.isCorrect) {
                         isTransitioning = true;
                         speak("答啱喇");
-                        cards.forEach(c => { if (c !== card) c.classList.add('fade-out'); });
+                        document.querySelectorAll('.match-card').forEach(c => { if (c !== card) c.classList.add('fade-out'); });
                         card.classList.add('correct-center');
-                        setTimeout(() => { area.innerHTML = ''; setTimeout(nextLevel, 500); }, 3000);
+                        setTimeout(() => { area.innerHTML = ''; nextLevel(); }, 3000);
                     } else {
                         card.style.borderColor = "var(--danger)";
-                        speak("唔係呢個");
+                        speak(opt.type === 'empty' ? "呢邊係空嘅" : "唔係呢個");
                         setTimeout(() => { if(!isTransitioning) card.style.borderColor = "transparent"; }, 1000);
                     }
                 }, config.dwell);
